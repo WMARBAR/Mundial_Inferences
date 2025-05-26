@@ -1,0 +1,43 @@
+# Entornos virtuales
+venv/
+env/
+.VENV/
+.venv/
+
+# Archivos de PyInstaller
+dist/
+build/
+*.spec
+
+# Archivos temporales de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos del sistema (Windows/macOS)
+.DS_Store
+Thumbs.db
+
+# Carpeta de logs o datos de runtime (opcional)
+*.log
+
+# Carpeta donde guardas datos en AppData local (por si alguna vez se sincroniza en tu máquina)
+# Puedes ignorarla si usas rutas dinámicas
+# /AppData/
+# Bases de datos
+*.db
+# Imágenes creadas por el usuario
+patients/**/*.jpg
+patients/**/*.jpeg
+patients/**/*.png
+patients/**/*.bmp
+
+modules/__pycache__/
+*.pyc
+
+**/__pycache__/
+
+# Informes CSV o PDF
+patients/informes/*.csv
+patients/PDF/*.pdf
