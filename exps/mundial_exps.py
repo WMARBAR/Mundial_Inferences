@@ -30,7 +30,8 @@ class Experimentos:
 
     def tabla_probabilidad_conjunta(self, df, columna_1, columna_2):
         """
-        Calcula una tabla de contingencia con probabilidades conjuntas.
+        Calcula una tabla de contingencia con probabilidades conjuntas,
+        ordenada de mayor a menor por la probabilidad del evento (columna 2 == 1).
 
         Args:
             df (pd.DataFrame): DataFrame con los datos.
@@ -38,7 +39,7 @@ class Experimentos:
             columna_2 (str): Nombre de la columna del evento binario (columnas en la tabla).
 
         Returns:
-            pd.DataFrame: Tabla de contingencia normalizada con probabilidades conjuntas.
+            pd.DataFrame: Tabla de contingencia normalizada y ordenada por la columna del evento 1.
         """
         # Validación de columnas
         if isinstance(columna_1, list):
@@ -47,8 +48,8 @@ class Experimentos:
                     raise ValueError(f"La columna '{col}' no existe en el DataFrame.")
             if columna_2 not in df.columns:
                 raise ValueError(f"La columna '{columna_2}' no existe en el DataFrame.")
-            
-            # Crear una nueva columna combinada
+
+            # Crear una columna combinada para el índice
             nombre_combinado = '_'.join(columna_1)
             df[nombre_combinado] = df[columna_1].astype(str).agg('_'.join, axis=1)
             index_col = nombre_combinado
@@ -63,6 +64,11 @@ class Experimentos:
 
         # Calcular tabla de contingencia con probabilidad conjunta
         tabla = pd.crosstab(df[index_col], df[columna_2], normalize='all')
+
+        # Ordenar por la columna del evento == 1 (si existe)
+        if 1 in tabla.columns:
+            tabla = tabla.sort_values(by=1, ascending=False)
+
         return tabla
 
 
