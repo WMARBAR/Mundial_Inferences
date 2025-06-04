@@ -6,6 +6,7 @@ import numpy as np
 
 class Experimentos:
     
+    
     def probabilidad_binaria_empirica(self,df, columna_objetivo):
         """
         Calcula la probabilidad empírica de éxito (valor 1) en una columna binaria.
@@ -159,48 +160,55 @@ class Experimentos:
             print(f"  {key}: {value:.6f}")
         
         return resultados
-    
-    def distribucion_hipergeometrica(self, df, N=None, K=None, n=None):
-        """
-        Calcula 3 probabilidades usando distribución hipergeométrica para selección de jugadores.
         
+    def distribucion_hipergeometrica_general(self, df, col_poblacion, col_exito, n=None, plot=True):
+        """
+        Calcula y grafica distribución hipergeométrica.
+
         Args:
-            df (pd.DataFrame): Base de datos de mundiales
-            N (int): Población total (por defecto: total de jugadores únicos)
-            K (int): Número de éxitos en población (por defecto: jugadores goleadores)
-            n (int): Número de extracciones (por defecto: jugadores por selección promedio)
-        
+            df (pd.DataFrame): DataFrame de entrada.
+            col_poblacion (str): Columna base del universo (ej: 'PLAYER_NAME').
+            col_exito (str): Columna binaria que indica éxitos (ej: 'dummy_goleador').
+            n (int, opcional): Tamaño de la muestra. Si no se especifica, se calcula.
+            plot (bool): Si True, muestra la gráfica de PMF.
+
         Returns:
-            dict: Diccionario con 3 probabilidades hipergeométricas
+            dict: Probabilidades hipergeométricas.
         """
-        # Configurar parámetros por defecto
-        if N is None:
-            N = df['PLAYER_NAME'].nunique()  # Total de jugadores únicos
-        
-        if K is None:
-            K = df['dummy_goleador'].sum()  # Total de goleadores
-        
+        N = df[col_poblacion].nunique()
+        K = df[col_exito].sum()
+
         if n is None:
-            # Promedio de jugadores por selección en cada mundial
             jugadores_por_seleccion = df.groupby(['MYEAR', 'SIG_SLECCCION']).size()
             n = int(jugadores_por_seleccion.mean())
-        
-        # Validar parámetros
+
         if K > N or n > N:
-            print("Error: Parámetros inválidos para distribución hipergeométrica")
-            return {}
-        
-        # Calcular 3 probabilidades diferentes
+            raise ValueError("Parámetros inválidos: K y n no pueden ser mayores que N.")
+
+        # Calculamos distribución
+        x = np.arange(0, n + 1)
+        pmf = hypergeom.pmf(x, N, K, n)
+
+        if plot:
+            plt.figure(figsize=(10, 5))
+            plt.bar(x, pmf, alpha=0.7)
+            plt.title(f'Distribución Hipergeométrica\nN={N}, K={K}, n={n}')
+            plt.xlabel('Número de éxitos en la muestra')
+            plt.ylabel('P(X = x)')
+            plt.grid(True)
+            plt.tight_layout()
+            plt.show()
+
         resultados = {
-            'prob_0_goleadores_seleccion': hypergeom.pmf(0, N, K, n),
-            'prob_exactamente_1_goleador': hypergeom.pmf(1, N, K, n),
-            'prob_al_menos_2_goleadores': 1 - hypergeom.cdf(1, N, K, n)
+            'prob_0_exitos': hypergeom.pmf(0, N, K, n),
+            'prob_exactamente_1_exito': hypergeom.pmf(1, N, K, n),
+            'prob_al_menos_2_exitos': 1 - hypergeom.cdf(1, N, K, n)
         }
-        
+
         print(f"Distribución Hipergeométrica (N={N}, K={K}, n={n}):")
         for key, value in resultados.items():
             print(f"  {key}: {value:.6f}")
-        
+
         return resultados
     
     def analisis_completo_distribuciones(self, df):
@@ -271,6 +279,8 @@ class Experimentos:
         # Resumen estadístico
         axes[1,1].axis('off')
         resumen_text = f"""RESUMEN ESTADÍSTICO:
+
+
         
 Binomial:
 - Ensayos (n): {n_trials}
@@ -288,7 +298,7 @@ Hipergeométrica:
 - Media: {n * K / N:.2f}"""
         
         axes[1,1].text(0.1, 0.9, resumen_text, transform=axes[1,1].transAxes, 
-                      fontsize=10, verticalalignment='top', fontfamily='monospace')
+                    fontsize=10, verticalalignment='top', fontfamily='monospace')
         
         plt.tight_layout()
         plt.show()
